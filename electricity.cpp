@@ -191,6 +191,13 @@ vector<Billing> surPlusCalc(vector<Billing> billList)
 
     return resultList;
 }
+
+vector<Billing> usedCummulativeCalc(vector<Billing> billList)
+{
+    vector<Billing> resultList;
+
+    return resultList;
+}
 int main()
 {
     vector<Electricity> electricDataList;
@@ -213,7 +220,9 @@ int main()
     billList = surPlusCalc(billList);
     displayBillList(billList);
 
-    // usedCummylativeCalc kwh
+    // usedCummulativeCalc kwh
+    billList = usedCummulativeCalc(billList);
+    displayBillList(billList);
 
     // diffUpNonPV_upPvCalc euro
 
