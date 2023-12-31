@@ -175,15 +175,21 @@ void displayBillList(vector<Billing> billList)
 vector<Billing> cummulativeStorageCalc(vector<Billing> billList)
 {
     vector<Billing> resultList = billList;
-    for ( int i = 0; i < resultList.size(); i++)
+    for (int i = 0; i < resultList.size(); i++)
     {
-        if ( i != 0 && resultList[i-1].surplus_Kwh !=0)
-        resultList[i].cumulativePv_Kwh = resultList[i-1].surplus_Kwh + resultList[i-1].cumulativePv_Kwh;
-        if (resultList[i-1].shortage_Kwh != 0 && i != 0 && resultList[i-1].cumulativePv_Kwh != 0)
+        if (i != 0 && resultList[i - 1].surplus_Kwh != 0)
+            resultList[i].cumulativePv_Kwh = resultList[i - 1].surplus_Kwh + resultList[i - 1].cumulativePv_Kwh;
+
+        if (resultList[i - 1].shortage_Kwh != 0 && i != 0 && resultList[i - 1].cumulativePv_Kwh != 0)
         {
-            resultList[i].cumulativePv_Kwh = resultList[i-1].cumulativePv_Kwh - resultList[i-1].shortage_Kwh;
-            if (resultList[i-1].shortage_Kwh > resultList[i-1].cumulativePv_Kwh)
-            resultList[i].cumulativePv_Kwh = 0; 
+            resultList[i].cumulativePv_Kwh = resultList[i - 1].cumulativePv_Kwh - resultList[i - 1].shortage_Kwh;
+            if (resultList[i - 1].shortage_Kwh > resultList[i - 1].cumulativePv_Kwh)
+                resultList[i].cumulativePv_Kwh = 0;
+
+            if (resultList[i - 1].year != resultList[i].year)
+            {
+                resultList[i].shortage_Kwh = resultList[i].electricConsumption - resultList[i].cumulativePv_Kwh - resultList[i].pvProduction;
+            }
         }
     }
     return resultList;
@@ -210,15 +216,17 @@ vector<Billing> shortageCalc(vector<Billing> billList)
 vector<Billing> surPlusCalc(vector<Billing> billList)
 {
     vector<Billing> resultList = billList;
-    for ( int i = 0; i < resultList.size(); i++)
+    for (int i = 0; i < resultList.size(); i++)
     {
         resultList[i].surplus_Kwh = resultList[i].pvProduction - resultList[i].electricConsumption;
-        if ( resultList[i].surplus_Kwh < 0)
+        if (resultList[i].surplus_Kwh < 0)
         {
-            resultList[i].surplus_Kwh = 0;}
-        else 
+            resultList[i].surplus_Kwh = 0;
+        }
+        else
         {
-            resultList[i].surplus_Kwh = resultList[i].pvProduction - resultList[i].electricConsumption;}
+            resultList[i].surplus_Kwh = resultList[i].pvProduction - resultList[i].electricConsumption;
+        }
     }
 
     return resultList;
@@ -266,17 +274,15 @@ int main()
 
     // shortageCalc kwh
     billList = shortageCalc(billList);
-    
+
     // cummulativeStorageCalc kwh
-     billList = cummulativeStorageCalc(billList);
+    billList = cummulativeStorageCalc(billList);
 
     displayBillList(billList);
     // displayBillList(billList);
 
-
-
     // usedCummulativeCalc kwh
-    //billList = usedCummulativeCalc(billList);
+    // billList = usedCummulativeCalc(billList);
     // displayBillList(billList);
 
     // diffUpNonPV_upPvCalc euro
@@ -284,8 +290,8 @@ int main()
     // displayBillList(billList);
 
     // upPvCalc euro
-    //billList = upPvCalc(billList);
-    //displayBillList(billList);
+    // billList = upPvCalc(billList);
+    // displayBillList(billList);
 
     // sum_DiffUpNonPvUpPvCalc_upPvCalc euro
 
