@@ -285,7 +285,14 @@ vector<Billing> savedMoneyCalc(vector<Billing> billList)
 }
 vector<Billing> cummulativeSavedMoneyCalc(vector<Billing> billList)
 {
-    vector<Billing> resultList;
+    vector<Billing> resultList = billList;
+    for ( int i = 0; i < resultList.size(); i++)
+    {
+        if( i == 0)
+        resultList[i].cummulativeSavedMoney_Euro = resultList[i].savedMoney_Euro;
+        else
+         resultList[i].cummulativeSavedMoney_Euro =  resultList[i].savedMoney_Euro +  resultList[i-1].cummulativeSavedMoney_Euro;
+    }
 
     return resultList;
 }
@@ -322,7 +329,6 @@ int main()
 
     // savedMoneyCalc euro
     billList = savedMoneyCalc(billList);
-    displayBillList(billList);
 
     // cummulativeSavedMoneyCalc euro
     billList = cummulativeSavedMoneyCalc(billList);
