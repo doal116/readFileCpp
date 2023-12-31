@@ -309,10 +309,23 @@ float averageConsumption(vector<Electricity> electricdata)
     return average;
 }
 
+float decreaseInProduction(vector<Electricity> electricdata)
+{
+    float average = 0, decreaseInAverage = 0;
+    int numOfElements = electricdata.size();
+    for (int i = 0; i < numOfElements; i++)
+    {
+        average += electricdata[i].pvProduction;
+    }
+    average = average / numOfElements;
+    decreaseInAverage = average * 0.01;
+    return decreaseInAverage;
+}
+
 int main()
 {
 
-    float average;
+    float average, decreaseInAverage;
     vector<Electricity> electricDataList;
     electricDataList = initializingDataList();
     // displayDataList(electricDataList);
@@ -351,8 +364,8 @@ int main()
     displayBillList(billList);
     
     average = averageConsumption(electricDataList);
-    cout << average;
-
+    decreaseInAverage = decreaseInProduction(electricDataList);
+    cout <<"Average: \t" << average << "\t Decrease of 1% in Production: \t" << decreaseInAverage;
 
     return 0;
 
