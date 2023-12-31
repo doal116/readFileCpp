@@ -199,7 +199,17 @@ vector<Billing> shortageCalc(vector<Billing> billList)
 
 vector<Billing> surPlusCalc(vector<Billing> billList)
 {
-    vector<Billing> resultList;
+    vector<Billing> resultList = billList;
+    for ( int i = 0; i < resultList.size(); i++)
+    {
+        resultList[i].surplus_Kwh = resultList[i].pvProduction - resultList[i].electricConsumption;
+        if ( resultList[i].surplus_Kwh < 0)
+        {
+            resultList[i].surplus_Kwh = 0;}
+        else 
+        {
+            resultList[i].surplus_Kwh = resultList[i].pvProduction - resultList[i].electricConsumption;}
+    }
 
     return resultList;
 }
@@ -242,11 +252,13 @@ int main()
     billList = initializingBillingList(electricDataList);
 
     // cummulativeStorageCalc kwh
+
     // billList = cummulativeStorageCalc(billList);
 
     // shortageCalc kwh
     billList = shortageCalc(billList);
     // displayBillList(billList);
+
 
     // surPlusCalc kwh
     // billList = surPlusCalc(billList);
