@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <iomanip>
 
 using namespace std;
 
@@ -32,14 +33,12 @@ void initializingDataList(vector<Electricity> &electricDataList)
         while (!electricData.eof())
         {
             electricData >> buffer;
-
+            if (electricData.eof())
+                break;
             if (buffer != ',')
-            {
                 data += buffer;
-            }
             else
             {
-                cout << data << "|";
                 switch (column)
                 {
                 case 0:
@@ -67,7 +66,6 @@ void initializingDataList(vector<Electricity> &electricDataList)
                 data = "";
                 if (column == 6)
                 {
-                    cout << endl;
                     electricDataList.push_back(cellBuffer);
                     column = 0;
                 }
@@ -82,20 +80,19 @@ void displayDataList(vector<Electricity> electricDataList)
 {
     for (int i = 0; i < electricDataList.size(); i++)
     {
-        cout << electricDataList[i].year << "|"
-             << electricDataList[i].month << "|"
-             << electricDataList[i].electricConsumption << "|"
-             << electricDataList[i].pvProduction << "|"
-             << electricDataList[i].upNonPv << "|"
-             << electricDataList[i].upPv;
+        cout << setw(10) << electricDataList[i].year << "|"
+             << setw(10) << electricDataList[i].month << "|"
+             << setw(10) << electricDataList[i].electricConsumption << "|"
+             << setw(10) << electricDataList[i].pvProduction << "|"
+             << setw(10) << electricDataList[i].upNonPv << "|"
+             << setw(10) << electricDataList[i].upPv << endl;
     }
 }
 
 int main()
 {
-    // Electricity electricDataList[24]
     vector<Electricity> electricDataList;
     initializingDataList(electricDataList);
-    // displayDataList(electricDataList);
+    displayDataList(electricDataList);
     return 0;
 }
