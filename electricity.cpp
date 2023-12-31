@@ -185,6 +185,12 @@ vector<Billing> shortageCalc(vector<Billing> billList)
     return resultList;
 }
 
+vector<Billing> surPlusCalc(vector<Billing> billList)
+{
+    vector<Billing> resultList;
+
+    return resultList;
+}
 int main()
 {
     vector<Electricity> electricDataList;
@@ -204,6 +210,8 @@ int main()
     displayBillList(billList);
 
     // surPlusCalc kwh
+    billList = surPlusCalc(billList);
+    displayBillList(billList);
 
     // usedCummylativeCalc kwh
 
