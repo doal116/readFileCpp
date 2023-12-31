@@ -259,6 +259,25 @@ vector<Billing> upPvCalc(vector<Billing> billList)
 
     return resultList;
 }
+vector<Billing> sum_DiffUpNonPvUpPvCalc_upPvCalc(vector<Billing> billList)
+{
+    vector<Billing> resultList;
+
+    return resultList;
+}
+vector<Billing> savedMoneyCalc(vector<Billing> billList)
+{
+    vector<Billing> resultList = billList;
+    for (int i = 0; i < resultList.size(); i++)
+    {
+        float priceWithoutPv = resultList[i].electricConsumption * resultList[i].upNonPv;
+        float priceWithPv = (resultList[i].electricConsumption - resultList[i].pvProduction) * resultList[i].upNonPv;
+
+        resultList[i].savedMoney_Euro = priceWithoutPv - (priceWithPv + resultList[i].upPv_Euro);
+    }
+
+    return resultList;
+}
 int main()
 {
     vector<Electricity> electricDataList;
@@ -281,17 +300,18 @@ int main()
     // usedCummulativeCalc kwh
     billList = usedCummulativeCalc(billList);
 
-    //emperor diffUpNonPV_upPvCalc euro
-    // billList = diffUpNonPV_upPvCalc(billList);
-    // displayBillList(billList);
+    // emperor diffUpNonPV_upPvCalc euro
+    //  billList = diffUpNonPV_upPvCalc(billList);
+    //  displayBillList(billList);
 
     // upPvCalc euro
     billList = upPvCalc(billList);
-    displayBillList(billList);
 
-    //emperor sum_DiffUpNonPvUpPvCalc_upPvCalc euro
+    // emperor sum_DiffUpNonPvUpPvCalc_upPvCalc euro
 
     // savedMoneyCalc euro
+    billList = savedMoneyCalc(billList);
+    displayBillList(billList);
 
     // cummaltiveSavedMoneyCalc euro
 
