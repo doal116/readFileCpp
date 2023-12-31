@@ -247,7 +247,11 @@ vector<Billing> usedCummulativeCalc(vector<Billing> billList)
 }
 vector<Billing> diffUpNonPV_upPvCalc(vector<Billing> billList)
 {
-    vector<Billing> resultList;
+    vector<Billing> resultList = billList;
+    for (int i = 0; i < resultList.size(); i++)
+    if (resultList[i].shortage_Kwh > resultList[i].cumulativePv_Kwh)
+        resultList[i].upNonPv_deducted_upPv_Euro = resultList[i].shortage_Kwh * resultList[i].upNonPv;
+    else resultList[i].upNonPv_deducted_upPv_Euro = 0;
 
     return resultList;
 }
@@ -262,7 +266,6 @@ vector<Billing> upPvCalc(vector<Billing> billList)
 vector<Billing> sum_DiffUpNonPvUpPvCalc_upPvCalc(vector<Billing> billList)
 {
     vector<Billing> resultList;
-
     return resultList;
 }
 vector<Billing> savedMoneyCalc(vector<Billing> billList)
@@ -301,8 +304,7 @@ int main()
     billList = usedCummulativeCalc(billList);
 
     // emperor diffUpNonPV_upPvCalc euro
-    //  billList = diffUpNonPV_upPvCalc(billList);
-    //  displayBillList(billList);
+    billList = diffUpNonPV_upPvCalc(billList);
 
     // upPvCalc euro
     billList = upPvCalc(billList);
