@@ -204,6 +204,12 @@ vector<Billing> diffUpNonPV_upPvCalc(vector<Billing> billList)
 
     return resultList;
 }
+vector<Billing> upPvCalc(vector<Billing> billList)
+{
+    vector<Billing> resultList;
+
+    return resultList;
+}
 int main()
 {
     vector<Electricity> electricDataList;
@@ -234,7 +240,8 @@ int main()
     billList = diffUpNonPV_upPvCalc(billList);
     displayBillList(billList);
     // upPvCalc euro
-
+    billList = upPvCalc(billList);
+    displayBillList(billList);
     // sum_DiffUpNonPvUpPvCalc_upPvCalc euro
 
     // savedMoneyCalc euro
