@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <cstdlib>
 
 using namespace std;
 
@@ -180,7 +181,18 @@ vector<Billing> cummulativeStorageCalc(vector<Billing> billList)
 
 vector<Billing> shortageCalc(vector<Billing> billList)
 {
-    vector<Billing> resultList;
+    vector<Billing> resultList = billList;
+
+    for (int i = 0; i < resultList.size(); i++)
+    {
+        float difference = resultList[i].electricConsumption - resultList[i].pvProduction;
+        if (difference > 0)
+            resultList[i].shortage_Kwh = difference;
+        else
+        {
+            resultList[i].shortage_Kwh = 0;
+        }
+    }
 
     return resultList;
 }
@@ -201,6 +213,34 @@ vector<Billing> surPlusCalc(vector<Billing> billList)
 
     return resultList;
 }
+
+vector<Billing> usedCummulativeCalc(vector<Billing> billList)
+{
+    vector<Billing> resultList = billList;
+    for (int i = 0; i < resultList.size(); i++)
+    {
+        if (resultList[i].cumulativePv_Kwh >= resultList[i].shortage_Kwh)
+            resultList[i].usedCumlativePv_Kwh = resultList[i].shortage_Kwh;
+        else
+            resultList[i].usedCumlativePv_Kwh = 0;
+    }
+
+    return resultList;
+}
+vector<Billing> diffUpNonPV_upPvCalc(vector<Billing> billList)
+{
+    vector<Billing> resultList;
+
+    return resultList;
+}
+vector<Billing> upPvCalc(vector<Billing> billList)
+{
+    vector<Billing> resultList = billList;
+    for (int i = 0; i < resultList.size(); i++)
+        resultList[i].upPv_Euro = resultList[i].pvProduction * resultList[i].upPv;
+
+    return resultList;
+}
 int main()
 {
     vector<Electricity> electricDataList;
@@ -212,22 +252,29 @@ int main()
     billList = initializingBillingList(electricDataList);
 
     // cummulativeStorageCalc kwh
-    //billList = cummulativeStorageCalc(billList);
-    //displayBillList(billList);
+
+    // billList = cummulativeStorageCalc(billList);
 
     // shortageCalc kwh
-   // billList = shortageCalc(billList);
-   // displayBillList(billList);
+    billList = shortageCalc(billList);
+    // displayBillList(billList);
+
 
     // surPlusCalc kwh
-    billList = surPlusCalc(billList);
-    displayBillList(billList);
+    // billList = surPlusCalc(billList);
+    // displayBillList(billList);
 
-    // usedCummylativeCalc kwh
+    // usedCummulativeCalc kwh
+    billList = usedCummulativeCalc(billList);
+    // displayBillList(billList);
 
     // diffUpNonPV_upPvCalc euro
+    // billList = diffUpNonPV_upPvCalc(billList);
+    // displayBillList(billList);
 
     // upPvCalc euro
+    billList = upPvCalc(billList);
+    displayBillList(billList);
 
     // sum_DiffUpNonPvUpPvCalc_upPvCalc euro
 
