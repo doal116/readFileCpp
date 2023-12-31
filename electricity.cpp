@@ -278,22 +278,18 @@ int main()
     // cummulativeStorageCalc kwh
     billList = cummulativeStorageCalc(billList);
 
-    displayBillList(billList);
-    // displayBillList(billList);
-
     // usedCummulativeCalc kwh
-    // billList = usedCummulativeCalc(billList);
-    // displayBillList(billList);
+    billList = usedCummulativeCalc(billList);
 
-    // diffUpNonPV_upPvCalc euro
+    //emperor diffUpNonPV_upPvCalc euro
     // billList = diffUpNonPV_upPvCalc(billList);
     // displayBillList(billList);
 
     // upPvCalc euro
-    // billList = upPvCalc(billList);
-    // displayBillList(billList);
+    billList = upPvCalc(billList);
+    displayBillList(billList);
 
-    // sum_DiffUpNonPvUpPvCalc_upPvCalc euro
+    //emperor sum_DiffUpNonPvUpPvCalc_upPvCalc euro
 
     // savedMoneyCalc euro
 
