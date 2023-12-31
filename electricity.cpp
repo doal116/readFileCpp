@@ -16,9 +16,39 @@ struct Electricity
     float upPv;
 };
 
-void initializingDataList(vector<Electricity> &electricDataList)
+struct Billing
+{
+    // row data
+    int year;
+    string month;
+    float electricConsumption;
+    float pvProduction;
+    float upNonPv;
+    float upPv;
+
+    // data after calculation
+    float cumulativePv_Kwh;
+    float shortage_Kwh;
+    float surplus_Kwh;
+    float usedCumlativePv_Kwh;
+
+    float upNonPv_deducted_upPv_Euro;
+    float upPv_Euro;
+    float upNonPv_UpPv_Euro;
+
+    float upNonPv_Euro;
+    // upNonPv_Euro - upNonPv_deducted_upPv_Euro
+    float savedMoney_Euro;
+
+    // savedMoney_Euro += savedMoney_Euro
+    float cummulativeSavedMoney_Euro;
+};
+
+vector<Electricity> initializingDataList()
 {
     fstream electricData;
+    vector<Electricity> dataImport;
+
     electricData.open("./data.txt", ios::in);
 
     if (!electricData)
@@ -66,33 +96,108 @@ void initializingDataList(vector<Electricity> &electricDataList)
                 data = "";
                 if (column == 6)
                 {
-                    electricDataList.push_back(cellBuffer);
+                    dataImport.push_back(cellBuffer);
                     column = 0;
                 }
             }
         }
     }
-
     electricData.close();
+    return dataImport;
 }
 
 void displayDataList(vector<Electricity> electricDataList)
 {
     for (int i = 0; i < electricDataList.size(); i++)
     {
-        cout << setw(10) << electricDataList[i].year << "|"
-             << setw(10) << electricDataList[i].month << "|"
-             << setw(10) << electricDataList[i].electricConsumption << "|"
-             << setw(10) << electricDataList[i].pvProduction << "|"
-             << setw(10) << electricDataList[i].upNonPv << "|"
-             << setw(10) << electricDataList[i].upPv << endl;
+        cout << setw(10) << left << electricDataList[i].year << "|"
+             << setw(10) << left << electricDataList[i].month << "|"
+             << setw(10) << left << electricDataList[i].electricConsumption << "|"
+             << setw(10) << left << electricDataList[i].pvProduction << "|"
+             << setw(10) << left << electricDataList[i].upNonPv << "|"
+             << setw(10) << left << electricDataList[i].upPv << endl;
+    }
+}
+
+vector<Billing> initializingBillingList(vector<Electricity> electricDataList)
+{
+    vector<Billing> resultList;
+    for (int i = 0; i < electricDataList.size(); i++)
+    {
+        Billing buffer;
+        buffer.year = electricDataList[i].year;
+        buffer.month = electricDataList[i].month;
+        buffer.electricConsumption = electricDataList[i].electricConsumption;
+        buffer.pvProduction = electricDataList[i].pvProduction;
+        buffer.upNonPv = electricDataList[i].upNonPv;
+        buffer.upPv = electricDataList[i].upPv;
+
+        buffer.cumulativePv_Kwh = 0;
+        buffer.shortage_Kwh = 0;
+        buffer.surplus_Kwh = 0;
+        buffer.usedCumlativePv_Kwh = 0;
+        buffer.upNonPv_deducted_upPv_Euro = 0;
+        buffer.upPv_Euro = 0;
+        buffer.upNonPv_UpPv_Euro = 0;
+        buffer.upNonPv_Euro = 0;
+        buffer.savedMoney_Euro = 0;
+        buffer.cummulativeSavedMoney_Euro = 0;
+
+        resultList.push_back(buffer);
+    }
+
+    return resultList;
+}
+
+void displayBillList(vector<Billing> billList)
+{
+    for (int i = 0; i < billList.size(); i++)
+    {
+        cout << setw(5) << left << billList[i].year << "|"
+             << setw(10) << left << billList[i].month << "|"
+             << setw(5) << left << billList[i].electricConsumption << "|"
+             << setw(8) << left << billList[i].pvProduction << "|"
+             << setw(8) << left << billList[i].cumulativePv_Kwh << "|"
+             << setw(8) << left << billList[i].shortage_Kwh << "|"
+             << setw(8) << left << billList[i].surplus_Kwh << "|"
+             << setw(8) << left << billList[i].usedCumlativePv_Kwh << "|"
+             << setw(7) << left << billList[i].upNonPv << "|"
+             << setw(8) << left << billList[i].upPv << "|"
+             << setw(8) << left << billList[i].upNonPv_deducted_upPv_Euro << "|"
+             << setw(8) << left << billList[i].upPv_Euro << "|"
+             << setw(8) << left << billList[i].upNonPv_UpPv_Euro << "|"
+             << setw(8) << left << billList[i].savedMoney_Euro << "|"
+             << setw(8) << left << billList[i].cummulativeSavedMoney_Euro << endl;
     }
 }
 
 int main()
 {
     vector<Electricity> electricDataList;
-    initializingDataList(electricDataList);
-    displayDataList(electricDataList);
+    electricDataList = initializingDataList();
+    // displayDataList(electricDataList);
+    vector<Billing> billList;
+    billList = initializingBillingList(electricDataList);
+    displayBillList(billList);
+    // initializing table calc with raw data.
+
+    // cummulativeStorageCalc kwh
+
+    // shortageCalc kwh
+
+    // surPlusCalc kwh
+
+    // usedCummylativeCalc kwh
+
+    // diffUpNonPV_upPvCalc euro
+
+    // upPvCalc euro
+
+    // sum_DiffUpNonPvUpPvCalc_upPvCalc euro
+
+    // savedMoneyCalc euro
+
+    // cummaltiveSavedMoneyCalc euro
+
     return 0;
 }
