@@ -173,7 +173,16 @@ void displayBillList(vector<Billing> billList)
 
 vector<Billing> cummulativeStorageCalc(vector<Billing> billList)
 {
-    vector<Billing> resultList;
+    vector<Billing> resultList = billList;
+    for ( int i = 0; i < resultList.size(); i++)
+    {
+        resultList[i].cumulativePv_Kwh = resultList[i].pvProduction - resultList[i].upNonPv;
+        if (resultList[i].cumulativePv_Kwh < 0)
+        {
+            resultList[i].cumulativePv_Kwh = 0;
+        }
+             
+    }
 
     return resultList;
 }
@@ -200,8 +209,6 @@ int main()
     displayBillList(billList);
 
     // shortageCalc kwh
-    billList = shortageCalc(billList);
-    displayBillList(billList);
 
     // surPlusCalc kwh
 
