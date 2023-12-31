@@ -180,7 +180,18 @@ vector<Billing> cummulativeStorageCalc(vector<Billing> billList)
 
 vector<Billing> shortageCalc(vector<Billing> billList)
 {
-    vector<Billing> resultList;
+    vector<Billing> resultList = billList;
+    
+    for (int i = 0; i < resultList.size(); i++)
+    {
+        float difference = resultList[i].electricConsumption - resultList[i].pvProduction;
+        if (difference > 0)
+            resultList[i].shortage_Kwh = difference;
+        else
+        {
+            resultList[i].shortage_Kwh = 0;
+        }
+    }
 
     return resultList;
 }
@@ -209,8 +220,7 @@ int main()
     billList = initializingBillingList(electricDataList);
 
     // cummulativeStorageCalc kwh
-    billList = cummulativeStorageCalc(billList);
-    displayBillList(billList);
+    // billList = cummulativeStorageCalc(billList);
 
     // shortageCalc kwh
     billList = shortageCalc(billList);
