@@ -265,7 +265,9 @@ vector<Billing> upPvCalc(vector<Billing> billList)
 }
 vector<Billing> sum_DiffUpNonPvUpPvCalc_upPvCalc(vector<Billing> billList)
 {
-    vector<Billing> resultList;
+    vector<Billing> resultList = billList;
+    for(int i = 0; i < resultList.size(); i++)
+    resultList[i].upNonPv_UpPv_Euro = resultList[i].upNonPv_deducted_upPv_Euro + resultList[i].upPv_Euro;
     return resultList;
 }
 vector<Billing> savedMoneyCalc(vector<Billing> billList)
@@ -310,6 +312,7 @@ int main()
     billList = upPvCalc(billList);
 
     // emperor sum_DiffUpNonPvUpPvCalc_upPvCalc euro
+    billList = sum_DiffUpNonPvUpPvCalc_upPvCalc(billList);
 
     // savedMoneyCalc euro
     billList = savedMoneyCalc(billList);
