@@ -222,6 +222,12 @@ vector<Billing> savedMoneyCalc(vector<Billing> billList)
 
     return resultList;
 }
+vector<Billing> cummulativeSavedMoneyCalc(vector<Billing> billList)
+{
+    vector<Billing> resultList;
+
+    return resultList;
+}
 int main()
 {
     vector<Electricity> electricDataList;
@@ -264,7 +270,9 @@ int main()
     billList = savedMoneyCalc(billList);
     displayBillList(billList);
 
-    // cummaltiveSavedMoneyCalc euro
+    // cummulativeSavedMoneyCalc euro
+    billList = cummulativeSavedMoneyCalc(billList);
+    displayBillList(billList);
 
     return 0;
 }
