@@ -296,8 +296,23 @@ vector<Billing> cummulativeSavedMoneyCalc(vector<Billing> billList)
 
     return resultList;
 }
+
+float averageConsumption(vector<Electricity> electricdata)
+{
+    float average = 0;
+    int numOfElements = electricdata.size();
+    for (int i = 0; i < numOfElements; i++)
+    {
+        average += electricdata[i].electricConsumption;
+    }
+    average = average / numOfElements;
+    return average;
+}
+
 int main()
 {
+
+    float average;
     vector<Electricity> electricDataList;
     electricDataList = initializingDataList();
     // displayDataList(electricDataList);
@@ -332,7 +347,13 @@ int main()
 
     // cummulativeSavedMoneyCalc euro
     billList = cummulativeSavedMoneyCalc(billList);
+
     displayBillList(billList);
+    
+    average = averageConsumption(electricDataList);
+    cout << average;
+
 
     return 0;
+
 }
