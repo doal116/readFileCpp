@@ -1,9 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
 #include <iomanip>
-#include <cstdlib>
 
 using namespace std;
 
@@ -16,40 +14,113 @@ struct Electricity
     float upNonPv;
     float upPv;
 };
-
-struct Billing
+struct Table
 {
-    // row data
+    //Given Data
     int year;
     string month;
-    float electricConsumption;
+    float electricConsumption; //Denoted as Grid Consumption
     float pvProduction;
     float upNonPv;
     float upPv;
 
-    // data after calculation
-    float cumulativePv_Kwh;
-    float shortage_Kwh;
-    float surplus_Kwh;
-    float usedCumlativePv_Kwh;
-
-    float upNonPv_deducted_upPv_Euro;
-    float upPv_Euro;
-    float upNonPv_UpPv_Euro;
-
-    float upNonPv_Euro;
-    // upNonPv_Euro - upNonPv_deducted_upPv_Euro
-    float savedMoney_Euro;
-
-    // savedMoney_Euro += savedMoney_Euro
-    float cummulativeSavedMoney_Euro;
+    //Calculated Data
+    float cumulativeStorage_KWh;
+    float shortage_KWh;
+    float surplus_KWh;
+    float usedFromCumulative_KWh;
+    float DiffInConsumptionProduction_Euro; // Denoted A
+    float costOfProducedEnergy_Euro;        //Denoted B
+    float sumDiffInConsumpProduc_Euro; //Sum of A and B
+    float savedCost_Euro; //This calculates (Grid Consumption * unit Price) - (A +  B)
+    float cumulativeSavedCost_Euro;
 };
 
-vector<Electricity> initializingDataList()
+//void displayDataList(Electricity electricDataList[24]);
+//void initializingTableValues(Electricity electricDataList[24]);
+void initializingDataList(Electricity (&cellBuffer)[24]);
+void displayTable(Table Table[24]);
+void calcShortage_KWh(Table (&Data)[24]);
+void calcSurplus_KWh(Table (&Data)[24]);
+void calcCumulativeStorage_KWh(Table (&Data)[24]);
+void usedFromCumulative_KWh(Table (&Data)[24]);
+void DiffInConsumptionProduction_Euro(Table (&Data)[24]);
+void costOfProducedEnergy_Euro(Table (&Data)[24]);
+void sumDiffInConsumpProduc_Euro(Table (&Data)[24]);
+void savedCost_Euro(Table (&Data)[24]);
+void cumulativeSavedCost_Euro(Table (&Data)[24]);
+float calcAverageConsumption(Table (&Data)[24]);
+float calcAverageProductionDecrease(Table (&Data)[24]);
+
+int main()
+
+{
+    Electricity electricDataList[24];
+    Table newTable[24];
+    initializingDataList(electricDataList);
+    for (int  i = 0; i < 24; i++)
+    {
+        newTable[i].year = electricDataList[i].year;
+        newTable[i].month = electricDataList[i].month;
+        newTable[i].electricConsumption = electricDataList[i].electricConsumption;
+        newTable[i].pvProduction = electricDataList[i].pvProduction;
+        newTable[i].upNonPv = electricDataList[i].upNonPv;
+        newTable[i].upPv = electricDataList[i].upPv;
+
+        newTable[i].cumulativeStorage_KWh = 0;
+        newTable[i].shortage_KWh = 0;
+        newTable[i].surplus_KWh = 0;
+        newTable[i].usedFromCumulative_KWh = 0;
+        newTable[i].DiffInConsumptionProduction_Euro = 0;
+        newTable[i].costOfProducedEnergy_Euro = 0;
+        newTable[i].sumDiffInConsumpProduc_Euro = 0;
+        newTable[i].savedCost_Euro = 0;
+        newTable[i].cumulativeSavedCost_Euro = 0;
+    }
+    calcShortage_KWh(newTable);
+    calcSurplus_KWh(newTable);
+    calcCumulativeStorage_KWh(newTable);
+    usedFromCumulative_KWh(newTable);
+    DiffInConsumptionProduction_Euro(newTable);
+    costOfProducedEnergy_Euro(newTable);
+    sumDiffInConsumpProduc_Euro(newTable);
+    savedCost_Euro(newTable);
+    cumulativeSavedCost_Euro(newTable);
+
+    cout<< setw(6) << left <<  "Year" << setw(12) << left << "Month"
+                << setw(10) << left << "Cnsump." << setw(10) << left << "Prodct."
+                << setw(9) << left <<  "C.S(KWh)" << setw(9) << left << "Stg(KWh)"
+                << setw(10) << left << "SKWh" << setw(10) << left << "UC(KWh)"
+                << setw(10) << left << "UCEuro" << setw(10) << left << "UPEuro" 
+                << setw(15) << left << "Msn.Elct.Euro" << setw(9) << left << "PE.Euro" 
+                << setw(13) << left << "SmBlsEuro" << setw(13) << left << "SvdCstEuro"
+                << setw(6) << left << "C.SvdCstEuro" << endl;
+
+    displayTable(newTable);
+
+    float averageConsumption = 0; float averageProduction = 0;
+    averageConsumption = calcAverageConsumption(newTable);
+    averageProduction = calcAverageProductionDecrease(newTable);
+    cout << "Average Consumption: \t" << averageConsumption << "\t\t"
+    << "1% Decrease of Average Production: \t" << averageProduction << endl;
+    return 0;
+}
+
+/*void displayDataList(Electricity electricDataList[24])
+{
+        for (int i = 0; i < 24; i++)
+        {
+            cout<< setw(6) << left <<  electricDataList[i].year
+                << setw(12) << left << electricDataList[i].month
+                << setw(5) << left << electricDataList[i].electricConsumption
+                << setw(8) << left << electricDataList[i].pvProduction
+                << setw(8) << left << electricDataList[i].upNonPv
+                << setw(10) << left << electricDataList[i].upPv << endl;
+        }
+}*/
+void initializingDataList(Electricity (&cellBuffer)[24])
 {
     fstream electricData;
-    vector<Electricity> dataImport;
-
     electricData.open("./data.txt", ios::in);
 
     if (!electricData)
@@ -58,37 +129,39 @@ vector<Electricity> initializingDataList()
     {
         char buffer;
         string data = "";
-        Electricity cellBuffer;
         int column = 0;
-
+        int i = 0;
+        int test=0;
         while (!electricData.eof())
         {
-            electricData >> buffer;
             if (electricData.eof())
-                break;
+            break;
+            electricData >> buffer;
             if (buffer != ',')
+            {
                 data += buffer;
+            }
             else
             {
                 switch (column)
                 {
                 case 0:
-                    cellBuffer.year = stoi(data);
+                    cellBuffer[i].year = stoi(data);
                     break;
                 case 1:
-                    cellBuffer.month = data;
+                    cellBuffer[i].month = data;
                     break;
                 case 2:
-                    cellBuffer.electricConsumption = stof(data);
+                    cellBuffer[i].electricConsumption = stof(data);
                     break;
                 case 3:
-                    cellBuffer.pvProduction = stof(data);
+                    cellBuffer[i].pvProduction = stof(data);
                     break;
                 case 4:
-                    cellBuffer.upNonPv = stof(data);
+                    cellBuffer[i].upNonPv = stof(data);
                     break;
                 case 5:
-                    cellBuffer.upPv = stof(data);
+                    cellBuffer[i].upPv = stof(data);
                     break;
                 default:
                     break;
@@ -97,276 +170,136 @@ vector<Electricity> initializingDataList()
                 data = "";
                 if (column == 6)
                 {
-                    dataImport.push_back(cellBuffer);
+                    if (i == 23 && column == 6) break;
                     column = 0;
+                    i++;
                 }
             }
         }
     }
     electricData.close();
-    return dataImport;
 }
-
-void displayDataList(vector<Electricity> electricDataList)
+void displayTable(Table Table[24])
 {
-    for (int i = 0; i < electricDataList.size(); i++)
+    for (int i = 0; i < 24; i++)
     {
-        cout << setw(10) << left << electricDataList[i].year << "|"
-             << setw(10) << left << electricDataList[i].month << "|"
-             << setw(10) << left << electricDataList[i].electricConsumption << "|"
-             << setw(10) << left << electricDataList[i].pvProduction << "|"
-             << setw(10) << left << electricDataList[i].upNonPv << "|"
-             << setw(10) << left << electricDataList[i].upPv << endl;
+        cout<< setw(6) << left <<  Table[i].year << setw(12) << left << Table[i].month
+                << setw(10) << left << Table[i].electricConsumption << setw(11) << left << Table[i].pvProduction
+                << setw(9) << left <<  Table[i].cumulativeStorage_KWh << setw(9) << left << Table[i].shortage_KWh
+                << setw(10) << left << Table[i].surplus_KWh << setw(10) << left << Table[i].usedFromCumulative_KWh
+                << setw(10) << left << Table[i].upNonPv << setw(10) << left << Table[i].upPv 
+                << setw(15) << left << Table[i].DiffInConsumptionProduction_Euro << setw(10) << left << Table[i].costOfProducedEnergy_Euro 
+                << setw(12) << left << Table[i].sumDiffInConsumpProduc_Euro << setw(13) << left << Table[i].savedCost_Euro
+                << setw(6) << left << Table[i].cumulativeSavedCost_Euro << endl;
+        }
+}
+void calcShortage_KWh(Table (&Data)[24])
+{
+    for (int i = 0; i < 24; i++)
+    {
+        Data[i].shortage_KWh = Data[i].electricConsumption - Data[i].pvProduction;
+        if(Data[i].shortage_KWh < 1) {Data[i].shortage_KWh = 0;}
     }
 }
-
-vector<Billing> initializingBillingList(vector<Electricity> electricDataList)
+void calcSurplus_KWh(Table (&Data)[24])
 {
-    vector<Billing> resultList;
-    for (int i = 0; i < electricDataList.size(); i++)
+    for (int i = 0; i < 24; i++)
     {
-        Billing buffer;
-        buffer.year = electricDataList[i].year;
-        buffer.month = electricDataList[i].month;
-        buffer.electricConsumption = electricDataList[i].electricConsumption;
-        buffer.pvProduction = electricDataList[i].pvProduction;
-        buffer.upNonPv = electricDataList[i].upNonPv;
-        buffer.upPv = electricDataList[i].upPv;
-
-        buffer.cumulativePv_Kwh = 0;
-        buffer.shortage_Kwh = 0;
-        buffer.surplus_Kwh = 0;
-        buffer.usedCumlativePv_Kwh = 0;
-        buffer.upNonPv_deducted_upPv_Euro = 0;
-        buffer.upPv_Euro = 0;
-        buffer.upNonPv_UpPv_Euro = 0;
-        buffer.upNonPv_Euro = 0;
-        buffer.savedMoney_Euro = 0;
-        buffer.cummulativeSavedMoney_Euro = 0;
-
-        resultList.push_back(buffer);
-    }
-
-    return resultList;
-}
-
-void displayBillList(vector<Billing> billList)
-{
-    for (int i = 0; i < billList.size(); i++)
-    {
-        cout << setw(5) << left << billList[i].year << "|"
-             << setw(10) << left << billList[i].month << "|"
-             << setw(5) << left << billList[i].electricConsumption << "|"
-             << setw(8) << left << billList[i].pvProduction << "|"
-             << setw(8) << left << billList[i].cumulativePv_Kwh << "|"
-             << setw(8) << left << billList[i].shortage_Kwh << "|"
-             << setw(8) << left << billList[i].surplus_Kwh << "|"
-             << setw(8) << left << billList[i].usedCumlativePv_Kwh << "|"
-             << setw(7) << left << billList[i].upNonPv << "|"
-             << setw(8) << left << billList[i].upPv << "|"
-             << setw(8) << left << billList[i].upNonPv_deducted_upPv_Euro << "|"
-             << setw(8) << left << billList[i].upPv_Euro << "|"
-             << setw(8) << left << billList[i].upNonPv_UpPv_Euro << "|"
-             << setw(8) << left << billList[i].savedMoney_Euro << "|"
-             << setw(8) << left << billList[i].cummulativeSavedMoney_Euro << endl;
+        Data[i].surplus_KWh = Data[i].pvProduction - Data[i].electricConsumption;
+        if(Data[i].surplus_KWh < 1) {Data[i].surplus_KWh = 0;}
     }
 }
-
-vector<Billing> cummulativeStorageCalc(vector<Billing> billList)
+void calcCumulativeStorage_KWh(Table (&Data)[24])
 {
-    vector<Billing> resultList = billList;
-    for (int i = 0; i < resultList.size(); i++)
+    for (int i = 0; i < 24; i++)
     {
-        if (i != 0 && resultList[i - 1].surplus_Kwh != 0)
-            resultList[i].cumulativePv_Kwh = resultList[i - 1].surplus_Kwh + resultList[i - 1].cumulativePv_Kwh;
-
-        if (resultList[i - 1].shortage_Kwh != 0 && i != 0 && resultList[i - 1].cumulativePv_Kwh != 0)
-        {
-            resultList[i].cumulativePv_Kwh = resultList[i - 1].cumulativePv_Kwh - resultList[i - 1].shortage_Kwh;
-            if (resultList[i - 1].shortage_Kwh > resultList[i - 1].cumulativePv_Kwh)
-                resultList[i].cumulativePv_Kwh = 0;
-
-            if (resultList[i - 1].year != resultList[i].year)
-            {
-                resultList[i].shortage_Kwh = resultList[i].electricConsumption - resultList[i].cumulativePv_Kwh - resultList[i].pvProduction;
-            }
+        if (i == 0) Data[i].cumulativeStorage_KWh = 0;
+        else{
+            Data[i].cumulativeStorage_KWh = Data[i-1].cumulativeStorage_KWh + Data[i-1].surplus_KWh;
+            if (Data[i-1].shortage_KWh > 0 && Data[i-1].surplus_KWh == 0 && Data[i].cumulativeStorage_KWh > 0) 
+                Data[i].cumulativeStorage_KWh = Data[i-1].cumulativeStorage_KWh - Data[i-1].shortage_KWh;
+            if (Data[i].cumulativeStorage_KWh < 0) Data[i].cumulativeStorage_KWh = 0;}
+    }
+}
+void usedFromCumulative_KWh(Table (&Data)[24])
+{
+for (int i = 0; i < 24; i++)
+    {
+        if (i == 0) 
+                Data[i].usedFromCumulative_KWh = 0;
+        else if (Data[i].cumulativeStorage_KWh >  Data[i].shortage_KWh)
+                Data[i].usedFromCumulative_KWh = Data[i].shortage_KWh;
+        else if (Data[i].shortage_KWh > Data[i].cumulativeStorage_KWh + Data[i].pvProduction)
+                Data[i].usedFromCumulative_KWh = Data[i].cumulativeStorage_KWh;
+    }
+}
+void DiffInConsumptionProduction_Euro(Table (&Data)[24])
+{
+    for (int i = 0; i < 24; i++)
+    {
+        if (Data[i].electricConsumption > (Data[i].pvProduction + Data[i].cumulativeStorage_KWh))
+        Data[i].DiffInConsumptionProduction_Euro = (Data[i].electricConsumption - (Data[i].pvProduction + Data[i].cumulativeStorage_KWh)) * Data[i].upNonPv;
+        else 
+        Data[i].DiffInConsumptionProduction_Euro = 0;
+    } 
+}
+void costOfProducedEnergy_Euro(Table (&Data)[24])
+{
+    for (int i = 0; i < 24; i++)
+    {
+        if (Data[i].electricConsumption > Data[i].pvProduction && Data[i].cumulativeStorage_KWh <= 0)
+        Data[i].costOfProducedEnergy_Euro = Data[i].pvProduction * Data[i].upPv;
+        else if (Data[i].electricConsumption > Data[i].pvProduction && Data[i].cumulativeStorage_KWh > 0)
+        Data[i].costOfProducedEnergy_Euro = Data[i].electricConsumption * Data[i].upPv;
+        else if (Data[i].electricConsumption < Data[i].pvProduction)
+        Data[i].costOfProducedEnergy_Euro = Data[i].electricConsumption * Data[i].upPv;
+    }
+}
+void sumDiffInConsumpProduc_Euro(Table (&Data)[24])
+{
+    for (int i = 0; i < 24; i++)
+    {
+        Data[i].sumDiffInConsumpProduc_Euro = Data[i].DiffInConsumptionProduction_Euro + Data[i].costOfProducedEnergy_Euro;
+    }
+}
+void savedCost_Euro(Table (&Data)[24])
+{
+    for (int i = 0; i < 24; i++)
+    {
+        if ((Data[i].electricConsumption > Data[i].pvProduction) && (Data[i].cumulativeStorage_KWh == 0 && Data[i].shortage_KWh > 1))
+        {Data[i].savedCost_Euro = (Data[i].electricConsumption * Data[i].upNonPv) - ((Data[i].shortage_KWh * Data[i].upNonPv) + (Data[i].pvProduction * Data[i].upPv));}
+        else{
+            Data[i].savedCost_Euro = (Data[i].electricConsumption * Data[i].upNonPv) - (Data[i].electricConsumption * Data[i].upPv);
         }
     }
-    return resultList;
 }
-
-vector<Billing> shortageCalc(vector<Billing> billList)
+void cumulativeSavedCost_Euro(Table (&Data)[24])
 {
-    vector<Billing> resultList = billList;
-
-    for (int i = 0; i < resultList.size(); i++)
+    for (int i = 0; i < 24; i++)
     {
-        float difference = resultList[i].electricConsumption - resultList[i].pvProduction;
-        if (difference > 0)
-            resultList[i].shortage_Kwh = difference;
-        else
-        {
-            resultList[i].shortage_Kwh = 0;
-        }
+    if(i == 0) Data[i].cumulativeSavedCost_Euro = Data[i].savedCost_Euro;
+    else{
+        Data[i].cumulativeSavedCost_Euro = Data[i].savedCost_Euro + Data[i-1].cumulativeSavedCost_Euro;
     }
-
-    return resultList;
+    }
 }
-
-vector<Billing> surPlusCalc(vector<Billing> billList)
+float calcAverageConsumption(Table (&Data)[24])
 {
-    vector<Billing> resultList = billList;
-    for (int i = 0; i < resultList.size(); i++)
+    float averageConsumption = 0;
+    for (int i = 0; i < 24; i++)
     {
-        resultList[i].surplus_Kwh = resultList[i].pvProduction - resultList[i].electricConsumption;
-        if (resultList[i].surplus_Kwh < 0)
-        {
-            resultList[i].surplus_Kwh = 0;
-        }
-        else
-        {
-            resultList[i].surplus_Kwh = resultList[i].pvProduction - resultList[i].electricConsumption;
-        }
+        averageConsumption = Data[i].electricConsumption + averageConsumption;
     }
-
-    return resultList;
+    return averageConsumption;
 }
-
-vector<Billing> usedCummulativeCalc(vector<Billing> billList)
+float calcAverageProductionDecrease(Table (&Data)[24])
 {
-    vector<Billing> resultList = billList;
-    for (int i = 0; i < resultList.size(); i++)
+    float averageProduction = 0;
+    for (int i = 0; i < 24; i++)
     {
-        if (resultList[i].cumulativePv_Kwh >= resultList[i].shortage_Kwh)
-            resultList[i].usedCumlativePv_Kwh = resultList[i].shortage_Kwh;
-        else
-            resultList[i].usedCumlativePv_Kwh = 0;
+        averageProduction = Data[i].pvProduction + averageProduction;
     }
-
-    return resultList;
-}
-vector<Billing> diffUpNonPV_upPvCalc(vector<Billing> billList)
-{
-    vector<Billing> resultList = billList;
-    for (int i = 0; i < resultList.size(); i++)
-    if (resultList[i].shortage_Kwh > resultList[i].cumulativePv_Kwh)
-        resultList[i].upNonPv_deducted_upPv_Euro = resultList[i].shortage_Kwh * resultList[i].upNonPv;
-    else resultList[i].upNonPv_deducted_upPv_Euro = 0;
-
-    return resultList;
-}
-vector<Billing> upPvCalc(vector<Billing> billList)
-{
-    vector<Billing> resultList = billList;
-    for (int i = 0; i < resultList.size(); i++)
-        resultList[i].upPv_Euro = resultList[i].pvProduction * resultList[i].upPv;
-
-    return resultList;
-}
-vector<Billing> sum_DiffUpNonPvUpPvCalc_upPvCalc(vector<Billing> billList)
-{
-    vector<Billing> resultList = billList;
-    for(int i = 0; i < resultList.size(); i++)
-    resultList[i].upNonPv_UpPv_Euro = resultList[i].upNonPv_deducted_upPv_Euro + resultList[i].upPv_Euro;
-    return resultList;
-}
-vector<Billing> savedMoneyCalc(vector<Billing> billList)
-{
-    vector<Billing> resultList = billList;
-    for (int i = 0; i < resultList.size(); i++)
-    {
-        float priceWithoutPv = resultList[i].electricConsumption * resultList[i].upNonPv;
-        float priceWithPv = (resultList[i].electricConsumption - resultList[i].pvProduction) * resultList[i].upNonPv;
-
-        resultList[i].savedMoney_Euro = priceWithoutPv - (priceWithPv + resultList[i].upPv_Euro);
-    }
-
-    return resultList;
-}
-vector<Billing> cummulativeSavedMoneyCalc(vector<Billing> billList)
-{
-    vector<Billing> resultList = billList;
-    for ( int i = 0; i < resultList.size(); i++)
-    {
-        if( i == 0)
-        resultList[i].cummulativeSavedMoney_Euro = resultList[i].savedMoney_Euro;
-        else
-         resultList[i].cummulativeSavedMoney_Euro =  resultList[i].savedMoney_Euro +  resultList[i-1].cummulativeSavedMoney_Euro;
-    }
-
-    return resultList;
+    averageProduction = averageProduction * 0.01;
+    return averageProduction;
 }
 
-float averageConsumption(vector<Electricity> electricdata)
-{
-    float average = 0;
-    int numOfElements = electricdata.size();
-    for (int i = 0; i < numOfElements; i++)
-    {
-        average += electricdata[i].electricConsumption;
-    }
-    average = average / numOfElements;
-    return average;
-}
-
-float decreaseInProduction(vector<Electricity> electricdata)
-{
-    float average = 0, decreaseInAverage = 0;
-    int numOfElements = electricdata.size();
-    for (int i = 0; i < numOfElements; i++)
-    {
-        average += electricdata[i].pvProduction;
-    }
-    average = average / numOfElements;
-    decreaseInAverage = average * 0.01;
-    return decreaseInAverage;
-}
-
-int main()
-{
-
-    float average, decreaseInAverage;
-    vector<Electricity> electricDataList;
-    electricDataList = initializingDataList();
-    // displayDataList(electricDataList);
-    vector<Billing> billList;
-
-    // initializing table calc with raw data.
-    billList = initializingBillingList(electricDataList);
-
-    // surPlusCalc kwh
-    billList = surPlusCalc(billList);
-
-    // shortageCalc kwh
-    billList = shortageCalc(billList);
-
-    // cummulativeStorageCalc kwh
-    billList = cummulativeStorageCalc(billList);
-
-    // usedCummulativeCalc kwh
-    billList = usedCummulativeCalc(billList);
-
-    // emperor diffUpNonPV_upPvCalc euro
-    billList = diffUpNonPV_upPvCalc(billList);
-
-    // upPvCalc euro
-    billList = upPvCalc(billList);
-
-    // emperor sum_DiffUpNonPvUpPvCalc_upPvCalc euro
-    billList = sum_DiffUpNonPvUpPvCalc_upPvCalc(billList);
-
-    // savedMoneyCalc euro
-    billList = savedMoneyCalc(billList);
-
-    // cummulativeSavedMoneyCalc euro
-    billList = cummulativeSavedMoneyCalc(billList);
-
-    displayBillList(billList);
-    
-    average = averageConsumption(electricDataList);
-    decreaseInAverage = decreaseInProduction(electricDataList);
-    cout <<"Average: \t" << average << "\t Decrease of 1% in Production: \t" << decreaseInAverage;
-
-    return 0;
-
-}
