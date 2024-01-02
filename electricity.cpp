@@ -185,11 +185,6 @@ vector<Billing> cummulativeStorageCalc(vector<Billing> billList)
             resultList[i].cumulativePv_Kwh = resultList[i - 1].cumulativePv_Kwh - resultList[i - 1].shortage_Kwh;
             if (resultList[i - 1].shortage_Kwh > resultList[i - 1].cumulativePv_Kwh)
                 resultList[i].cumulativePv_Kwh = 0;
-
-            if (resultList[i - 1].year != resultList[i].year)
-            {
-                resultList[i].shortage_Kwh = resultList[i].electricConsumption - resultList[i].cumulativePv_Kwh - resultList[i].pvProduction;
-            }
         }
     }
     return resultList;
@@ -237,10 +232,10 @@ vector<Billing> usedCummulativeCalc(vector<Billing> billList)
     vector<Billing> resultList = billList;
     for (int i = 0; i < resultList.size(); i++)
     {
-        if (resultList[i].cumulativePv_Kwh >= resultList[i].shortage_Kwh)
-            resultList[i].usedCumlativePv_Kwh = resultList[i].shortage_Kwh;
+        if (resultList[i].cumulativePv_Kwh < resultList[i].shortage_Kwh)
+            resultList[i].usedCumlativePv_Kwh = resultList[i].cumulativePv_Kwh;
         else
-            resultList[i].usedCumlativePv_Kwh = 0;
+            resultList[i].usedCumlativePv_Kwh = resultList[i].shortage_Kwh;
     }
 
     return resultList;
@@ -249,9 +244,10 @@ vector<Billing> diffUpNonPV_upPvCalc(vector<Billing> billList)
 {
     vector<Billing> resultList = billList;
     for (int i = 0; i < resultList.size(); i++)
-    if (resultList[i].shortage_Kwh > resultList[i].cumulativePv_Kwh)
-        resultList[i].upNonPv_deducted_upPv_Euro = resultList[i].shortage_Kwh * resultList[i].upNonPv;
-    else resultList[i].upNonPv_deducted_upPv_Euro = 0;
+        if (resultList[i].shortage_Kwh > resultList[i].cumulativePv_Kwh)
+            resultList[i].upNonPv_deducted_upPv_Euro = resultList[i].shortage_Kwh * resultList[i].upNonPv;
+        else
+            resultList[i].upNonPv_deducted_upPv_Euro = 0;
 
     return resultList;
 }
@@ -259,15 +255,22 @@ vector<Billing> upPvCalc(vector<Billing> billList)
 {
     vector<Billing> resultList = billList;
     for (int i = 0; i < resultList.size(); i++)
-        resultList[i].upPv_Euro = resultList[i].pvProduction * resultList[i].upPv;
+    {
+        float value = resultList[i].cumulativePv_Kwh + resultList[i].pvProduction;
+        
+        if (value > resultList[i].electricConsumption)
+            resultList[i].upPv_Euro = resultList[i].electricConsumption * resultList[i].upPv;
+        else
+            resultList[i].upPv_Euro = resultList[i].pvProduction * resultList[i].upPv;
+    }
 
     return resultList;
 }
 vector<Billing> sum_DiffUpNonPvUpPvCalc_upPvCalc(vector<Billing> billList)
 {
     vector<Billing> resultList = billList;
-    for(int i = 0; i < resultList.size(); i++)
-    resultList[i].upNonPv_UpPv_Euro = resultList[i].upNonPv_deducted_upPv_Euro + resultList[i].upPv_Euro;
+    for (int i = 0; i < resultList.size(); i++)
+        resultList[i].upNonPv_UpPv_Euro = resultList[i].upNonPv_deducted_upPv_Euro + resultList[i].upPv_Euro;
     return resultList;
 }
 vector<Billing> savedMoneyCalc(vector<Billing> billList)
@@ -286,12 +289,12 @@ vector<Billing> savedMoneyCalc(vector<Billing> billList)
 vector<Billing> cummulativeSavedMoneyCalc(vector<Billing> billList)
 {
     vector<Billing> resultList = billList;
-    for ( int i = 0; i < resultList.size(); i++)
+    for (int i = 0; i < resultList.size(); i++)
     {
-        if( i == 0)
-        resultList[i].cummulativeSavedMoney_Euro = resultList[i].savedMoney_Euro;
+        if (i == 0)
+            resultList[i].cummulativeSavedMoney_Euro = resultList[i].savedMoney_Euro;
         else
-         resultList[i].cummulativeSavedMoney_Euro =  resultList[i].savedMoney_Euro +  resultList[i-1].cummulativeSavedMoney_Euro;
+            resultList[i].cummulativeSavedMoney_Euro = resultList[i].savedMoney_Euro + resultList[i - 1].cummulativeSavedMoney_Euro;
     }
 
     return resultList;
@@ -362,11 +365,10 @@ int main()
     billList = cummulativeSavedMoneyCalc(billList);
 
     displayBillList(billList);
-    
+
     average = averageConsumption(electricDataList);
     decreaseInAverage = decreaseInProduction(electricDataList);
-    cout <<"Average: \t" << average << "\t Decrease of 1% in Production: \t" << decreaseInAverage;
+    cout << "Average: \t" << average << "\t Decrease of 1% in Production: \t" << decreaseInAverage;
 
     return 0;
-
 }
